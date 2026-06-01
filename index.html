@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ConvertPro - 免费在线文件格式转换</title>
+<meta name="description" content="免费在线文件格式转换工具，支持图片、文档、PDF、文本等多种格式互转，无需上传服务器，保护隐私安全。">
+<style>
+:root {
+  --primary: #4F46E5;
+  --primary-hover: #4338CA;
+  --bg: #F8FAFC;
+  --card: #FFFFFF;
+  --text: #1E293B;
+  --text-secondary: #64748B;
+  --border: #E2E8F0;
+  --success: #10B981;
+  --danger: #EF4444;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+/* Header */
+.header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.5px;
+}
+.logo span { color: var(--text); font-weight: 600; }
+.nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.nav-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.nav-btn:hover, .nav-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 48px 24px 32px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 12px; letter-spacing: -1px; }
+.hero p { color: var(--text-secondary); font-size: 18px; }
+/* Main */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+/* Category Grid */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.cat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+.cat-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+.cat-icon { font-size: 32px; margin-bottom: 8px; }
+.cat-card h3 { font-size: 16px; margin-bottom: 4px; }
+.cat-card p { font-size: 13px; color: var(--text-secondary); }
+/* Converter Panel */
+.converter-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  display: none;
+}
+.converter-panel.active { display: block; }
+.converter-panel h2 { font-size: 22px; margin-bottom: 8px; }
+.converter-panel .subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+/* Drop Zone */
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 20px;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--primary);
+  background: #EEF2FF;
+}
+.drop-zone .icon { font-size: 48px; margin-bottom: 12px; }
+.drop-zone p { color: var(--text-secondary); font-size: 14px; }
+.drop-zone .browse { color: var(--primary); font-weight: 600; text-decoration: underline; }
+/* Format Select */
+.format-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.format-row label { font-weight: 600; font-size: 14px; }
+.format-row select {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--card);
+  min-width: 160px;
+}
+/* Buttons */
+.btn {
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-outline {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-outline:hover { background: #F1F5F9; }
+/* File List */
+.file-list { margin-bottom: 16px; }
+.file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #F8FAFC;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.file-item .name { font-weight: 500; flex: 1; }
+.file-item .size { color: var(--text-secondary); margin: 0 12px; font-size: 13px; }
+.file-item .remove { color: var(--danger); cursor: pointer; font-weight: 700; padding: 2px 8px; }
+/* Progress */
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin: 16px 0;
+  overflow: hidden;
+  display: none;
+}
+.progress-bar.active { display: block; }
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.3s;
+}
+/* Result */
+.result-area { display: none; margin-top: 20px; }
+.result-area.active { display: block; }
+.result-area .success-msg {
+  color: var(--success);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+/* Text Converter */
+.text-area {
+  width: 100%;
+  min-height: 200px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  resize: vertical;
+  margin-bottom: 16px;
+}
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 32px 24px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+}
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--text);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+/* Responsive */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 26px; }
+  .converter-panel { padding: 20px; }
+  .format-row { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">Convert<span>Pro</span></div>
+    <nav class="nav">
+      <button class="nav-btn active" data-cat="all">全部工具</button>
+      <button class="nav-btn" data-cat="image">图片转换</button>
+      <button class="nav-btn" data-cat="pdf">PDF工具</button>
+      <button class="nav-btn" data-cat="text">文本转换</button>
+      <button class="nav-btn" data-cat="doc">文档转换</button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>免费在线文件格式转换</h1>
+  <p>纯浏览器端处理，文件不上传服务器，保护你的隐私安全</p>
+</section>
+
+<main class="main">
+  <!-- Category Cards -->
+  <div class="category-grid" id="categoryGrid"></div>
+
+  <!-- Converter Panel -->
+  <div class="converter-panel" id="converterPanel">
+    <button class="btn btn-outline" id="backBtn" style="margin-bottom:16px;">← 返回工具列表</button>
+    <h2 id="convTitle"></h2>
+    <p class="subtitle" id="convSubtitle"></p>
+    <div id="convBody"></div>
+  </div>
+</main>
+
+<footer class="footer">
+  <p>ConvertPro - 所有转换均在浏览器本地完成，文件不会上传到任何服务器。</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/turndown@7.1.2/dist/turndown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+
+<script>
+// ============ DATA ============
+const tools = [
+  // Image
+  { id: 'png-to-jpg', cat: 'image', title: 'PNG 转 JPG', desc: '将PNG图片转换为JPG格式', icon: '🖼️', from: 'PNG', to: 'JPG', fromExt: 'png', toExt: 'jpg', mime: 'image/jpeg', type: 'image' },
+  { id: 'jpg-to-png', cat: 'image', title: 'JPG 转 PNG', desc: '将JPG图片转换为PNG格式', icon: '🖼️', from: 'JPG', to: 'PNG', fromExt: 'jpg', toExt: 'png', mime: 'image/png', type: 'image' },
+  { id: 'png-to-webp', cat: 'image', title: 'PNG 转 WebP', desc: '将PNG图片转换为WebP格式', icon: '🖼️', from: 'PNG', to: 'WebP', fromExt: 'png', toExt: 'webp', mime: 'image/webp', type: 'image' },
+  { id: 'webp-to-png', cat: 'image', title: 'WebP 转 PNG', desc: '将WebP图片转换为PNG格式', icon: '🖼️', from: 'WebP', to: 'PNG', fromExt: 'webp', toExt: 'png', mime: 'image/png', type: 'image' },
+  { id: 'jpg-to-webp', cat: 'image', title: 'JPG 转 WebP', desc: '将JPG图片转换为WebP格式', icon: '🖼️', from: 'JPG', to: 'WebP', fromExt: 'jpg', toExt: 'webp', mime: 'image/webp', type: 'image' },
+  { id: 'image-compress', cat: 'image', title: '图片压缩', desc: '压缩图片文件大小，支持质量调节', icon: '🗜️', from: '图片', to: '压缩', fromExt: 'jpg,png,webp', toExt: 'jpg', mime: 'image/jpeg', type: 'image-compress' },
+  // PDF
+  { id: 'pdf-merge', cat: 'pdf', title: 'PDF 合并', desc: '将多个PDF文件合并为一个', icon: '📑', from: 'PDF', to: 'PDF', fromExt: 'pdf', toExt: 'pdf', mime: 'application/pdf', type: 'pdf-merge' },
+  { id: 'pdf-extract', cat: 'pdf', title: 'PDF 提取页面', desc: '从PDF中提取指定页面', icon: '📄', from: 'PDF', to: 'PDF', fromExt: 'pdf', toExt: 'pdf', mime: 'application/pdf', type: 'pdf-extract' },
+  // Text
+  { id: 'json-to-csv', cat: 'text', title: 'JSON 转 CSV', desc: '将JSON数据转换为CSV表格格式', icon: '📊', from: 'JSON', to: 'CSV', fromExt: 'json', toExt: 'csv', mime: 'text/csv', type: 'text' },
+  { id: 'csv-to-json', cat: 'text', title: 'CSV 转 JSON', desc: '将CSV表格转换为JSON格式', icon: '📊', from: 'CSV', to: 'JSON', fromExt: 'csv', toExt: 'json', mime: 'application/json', type: 'text' },
+  { id: 'json-to-yaml', cat: 'text', title: 'JSON 转 YAML', desc: '将JSON转换为YAML配置格式', icon: '⚙️', from: 'JSON', to: 'YAML', fromExt: 'json', toExt: 'yaml', mime: 'text/yaml', type: 'text' },
+  { id: 'yaml-to-json', cat: 'text', title: 'YAML 转 JSON', desc: '将YAML转换为JSON格式', icon: '⚙️', from: 'YAML', to: 'JSON', fromExt: 'yaml', toExt: 'json', mime: 'application/json', type: 'text' },
+  // Document
+  { id: 'md-to-html', cat: 'doc', title: 'Markdown 转 HTML', desc: '将Markdown文档转换为HTML', icon: '📝', from: 'MD', to: 'HTML', fromExt: 'md', toExt: 'html', mime: 'text/html', type: 'text' },
+  { id: 'html-to-md', cat: 'doc', title: 'HTML 转 Markdown', desc: '将HTML内容转换为Markdown', icon: '📝', from: 'HTML', to: 'MD', fromExt: 'html', toExt: 'md', mime: 'text/markdown', type: 'text' },
+  { id: 'docx-to-txt', cat: 'doc', title: 'DOCX 转 TXT', desc: '将Word文档转换为纯文本', icon: '📃', from: 'DOCX', to: 'TXT', fromExt: 'docx', toExt: 'txt', mime: 'text/plain', type: 'docx' },
+];
+
+let currentTool = null;
+let selectedFiles = [];
+
+// ============ RENDER ============
+function renderCategories(cat = 'all') {
+  const grid = document.getElementById('categoryGrid');
+  const filtered = cat === 'all' ? tools : tools.filter(t => t.cat === cat);
+  grid.innerHTML = filtered.map(t => `
+    <div class="cat-card" onclick="openTool('${t.id}')">
+      <div class="cat-icon">${t.icon}</div>
+      <h3>${t.title}</h3>
+      <p>${t.desc}</p>
+    </div>
+  `).join('');
+}
+
+function openTool(id) {
+  currentTool = tools.find(t => t.id === id);
+  if (!currentTool) return;
+  selectedFiles = [];
+  document.getElementById('categoryGrid').style.display = 'none';
+  const panel = document.getElementById('converterPanel');
+  panel.classList.add('active');
+  document.getElementById('convTitle').textContent = currentTool.title;
+  document.getElementById('convSubtitle').textContent = `将${currentTool.from}格式转换为${currentTool.to}格式`;
+  renderConvBody();
+}
+
+function goBack() {
+  document.getElementById('converterPanel').classList.remove('active');
+  document.getElementById('categoryGrid').style.display = '';
+  currentTool = null;
+  selectedFiles = [];
+}
+
+function renderConvBody() {
+  const body = document.getElementById('convBody');
+  const t = currentTool;
+
+  if (t.type === 'image' || t.type === 'image-compress') {
+    body.innerHTML = `
+      <div class="drop-zone" id="dropZone">
+        <div class="icon">📁</div>
+        <p>拖拽图片到此处，或 <span class="browse">点击浏览</span></p>
+        <p style="font-size:12px;margin-top:4px;">支持 ${t.fromExt.toUpperCase()} 格式</p>
+        <input type="file" id="fileInput" accept=".${t.fromExt.replace(/,/g, ',.')}" ${t.type === 'pdf-merge' ? 'multiple' : ''} style="display:none">
+      </div>
+      ${t.type === 'image-compress' ? `
+      <div class="format-row">
+        <label>压缩质量：</label>
+        <input type="range" id="qualitySlider" min="10" max="100" value="80" style="flex:1;max-width:200px;">
+        <span id="qualityLabel">80%</span>
+      </div>` : ''}
+      <div class="file-list" id="fileList"></div>
+      <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+      <button class="btn btn-primary" id="convertBtn" disabled>开始转换</button>
+      <div class="result-area" id="resultArea"></div>
+    `;
+    setupDropZone();
+    if (t.type === 'image-compress') {
+      document.getElementById('qualitySlider').addEventListener('input', function() {
+        document.getElementById('qualityLabel').textContent = this.value + '%';
+      });
+    }
+  } else if (t.type === 'pdf-merge' || t.type === 'pdf-extract') {
+    body.innerHTML = `
+      <div class="drop-zone" id="dropZone">
+        <div class="icon">📁</div>
+        <p>拖拽PDF文件到此处，或 <span class="browse">点击浏览</span></p>
+        <p style="font-size:12px;margin-top:4px;">支持 PDF 格式${t.type === 'pdf-merge' ? '，可选择多个文件' : ''}</p>
+        <input type="file" id="fileInput" accept=".pdf" ${t.type === 'pdf-merge' ? 'multiple' : ''} style="display:none">
+      </div>
+      ${t.type === 'pdf-extract' ? `
+      <div class="format-row">
+        <label>提取页码范围（如 1,3-5）：</label>
+        <input type="text" id="pageRange" placeholder="1,3-5" style="padding:10px;border:1px solid var(--border);border-radius:8px;width:200px;">
+      </div>` : ''}
+      <div class="file-list" id="fileList"></div>
+      <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+      <button class="btn btn-primary" id="convertBtn" disabled>开始转换</button>
+      <div class="result-area" id="resultArea"></div>
+    `;
+    setupDropZone();
+  } else if (t.type === 'text') {
+    body.innerHTML = `
+      <textarea class="text-area" id="inputText" placeholder="在此粘贴${t.from}内容..."></textarea>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">或上传 ${t.fromExt.toUpperCase()} 文件</p>
+      <input type="file" id="fileInput" accept=".${t.fromExt}" style="margin-bottom:16px;">
+      <button class="btn btn-primary" id="convertBtn">开始转换</button>
+      <div class="result-area" id="resultArea"></div>
+    `;
+    document.getElementById('convertBtn').addEventListener('click', handleTextConvert);
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        document.getElementById('inputText').value = ev.target.result;
+      };
+      reader.readAsText(file);
+    });
+  } else if (t.type === 'docx') {
+    body.innerHTML = `
+      <div class="drop-zone" id="dropZone">
+        <div class="icon">📁</div>
+        <p>拖拽DOCX文件到此处，或 <span class="browse">点击浏览</span></p>
+        <input type="file" id="fileInput" accept=".docx" style="display:none">
+      </div>
+      <div class="file-list" id="fileList"></div>
+      <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+      <button class="btn btn-primary" id="convertBtn" disabled>开始转换</button>
+      <div class="result-area" id="resultArea"></div>
+    `;
+    setupDropZone();
+  }
+}
+
+function setupDropZone() {
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  if (!dropZone || !fileInput) return;
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', e => handleFiles(e.target.files));
+}
+
+function handleFiles(files) {
+  const t = currentTool;
+  const acceptExts = t.fromExt.split(',');
+  for (const file of files) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!acceptExts.includes(ext)) {
+      showToast(`不支持 ${file.name} 的文件格式`);
+      continue;
+    }
+    if (!selectedFiles.find(f => f.name === file.name && f.size === file.size)) {
+      selectedFiles.push(file);
+    }
+  }
+  renderFileList();
+  updateConvertBtn();
+}
+
+function renderFileList() {
+  const list = document.getElementById('fileList');
+  if (!list) return;
+  list.innerHTML = selectedFiles.map((f, i) => `
+    <div class="file-item">
+      <span class="name">${f.name}</span>
+      <span class="size">${formatSize(f.size)}</span>
+      <span class="remove" onclick="removeFile(${i})">✕</span>
+    </div>
+  `).join('');
+}
+
+function removeFile(i) {
+  selectedFiles.splice(i, 1);
+  renderFileList();
+  updateConvertBtn();
+}
+
+function updateConvertBtn() {
+  const btn = document.getElementById('convertBtn');
+  if (!btn) return;
+  btn.disabled = selectedFiles.length === 0;
+  if (currentTool.type === 'pdf-merge') {
+    btn.disabled = selectedFiles.length < 2;
+  }
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ============ CONVERSION LOGIC ============
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'convertBtn' && currentTool) {
+    const t = currentTool;
+    if (t.type === 'image') handleImageConvert();
+    else if (t.type === 'image-compress') handleImageCompress();
+    else if (t.type === 'pdf-merge') handlePdfMerge();
+    else if (t.type === 'pdf-extract') handlePdfExtract();
+    else if (t.type === 'docx') handleDocxConvert();
+  }
+});
+
+async function handleImageConvert() {
+  const t = currentTool;
+  const resultArea = document.getElementById('resultArea');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  resultArea.innerHTML = '';
+  resultArea.classList.add('active');
+  progressBar.classList.add('active');
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    const file = selectedFiles[i];
+    progressFill.style.width = ((i / selectedFiles.length) * 100) + '%';
+    try {
+      const img = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, t.mime, 0.92));
+      const newName = file.name.replace(new RegExp(`\\.${t.fromExt}$`, 'i'), `.${t.toExt}`);
+      saveAs(blob, newName);
+    } catch (err) {
+      showToast(`转换 ${file.name} 失败: ${err.message}`);
+    }
+  }
+  progressFill.style.width = '100%';
+  setTimeout(() => progressBar.classList.remove('active'), 500);
+  resultArea.innerHTML = '<p class="success-msg">转换完成！文件已自动下载。</p>';
+}
+
+async function handleImageCompress() {
+  const quality = parseInt(document.getElementById('qualitySlider').value) / 100;
+  const resultArea = document.getElementById('resultArea');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  resultArea.innerHTML = '';
+  resultArea.classList.add('active');
+  progressBar.classList.add('active');
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    const file = selectedFiles[i];
+    progressFill.style.width = ((i / selectedFiles.length) * 100) + '%';
+    try {
+      const img = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+      const newName = file.name.replace(/\.[^.]+$/, '_compressed.jpg');
+      saveAs(blob, newName);
+    } catch (err) {
+      showToast(`压缩 ${file.name} 失败: ${err.message}`);
+    }
+  }
+  progressFill.style.width = '100%';
+  setTimeout(() => progressBar.classList.remove('active'), 500);
+  resultArea.innerHTML = '<p class="success-msg">压缩完成！文件已自动下载。</p>';
+}
+
+async function handlePdfMerge() {
+  const resultArea = document.getElementById('resultArea');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  resultArea.innerHTML = '';
+  resultArea.classList.add('active');
+  progressBar.classList.add('active');
+  progressFill.style.width = '30%';
+
+  try {
+    const { PDFDocument } = PDFLib;
+    const mergedPdf = await PDFDocument.create();
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await PDFDocument.load(arrayBuffer);
+      const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+      pages.forEach(p => mergedPdf.addPage(p));
+      progressFill.style.width = (30 + (i / selectedFiles.length) * 60) + '%';
+    }
+    const pdfBytes = await mergedPdf.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    saveAs(blob, 'merged.pdf');
+    progressFill.style.width = '100%';
+    setTimeout(() => progressBar.classList.remove('active'), 500);
+    resultArea.innerHTML = '<p class="success-msg">PDF合并完成！文件已自动下载。</p>';
+  } catch (err) {
+    showToast('合并失败: ' + err.message);
+    progressBar.classList.remove('active');
+  }
+}
+
+async function handlePdfExtract() {
+  const resultArea = document.getElementById('resultArea');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  const pageRangeStr = document.getElementById('pageRange')?.value || '1';
+  resultArea.innerHTML = '';
+  resultArea.classList.add('active');
+  progressBar.classList.add('active');
+
+  try {
+    const { PDFDocument } = PDFLib;
+    const file = selectedFiles[0];
+    const arrayBuffer = await file.arrayBuffer();
+    const srcPdf = await PDFDocument.load(arrayBuffer);
+    const totalPages = srcPdf.getPageCount();
+
+    // Parse page range
+    const pages = [];
+    const parts = pageRangeStr.split(',');
+    for (const part of parts) {
+      if (part.includes('-')) {
+        const [s, e] = part.split('-').map(Number);
+        for (let p = s; p <= Math.min(e, totalPages); p++) pages.push(p - 1);
+      } else {
+        const p = parseInt(part);
+        if (p >= 1 && p <= totalPages) pages.push(p - 1);
+      }
+    }
+
+    const newPdf = await PDFDocument.create();
+    const copiedPages = await newPdf.copyPages(srcPdf, pages);
+    copiedPages.forEach(p => newPdf.addPage(p));
+    const pdfBytes = await newPdf.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    saveAs(blob, 'extracted.pdf');
+    progressFill.style.width = '100%';
+    setTimeout(() => progressBar.classList.remove('active'), 500);
+    resultArea.innerHTML = '<p class="success-msg">PDF页面提取完成！文件已自动下载。</p>';
+  } catch (err) {
+    showToast('提取失败: ' + err.message);
+    progressBar.classList.remove('active');
+  }
+}
+
+async function handleDocxConvert() {
+  const resultArea = document.getElementById('resultArea');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  resultArea.innerHTML = '';
+  resultArea.classList.add('active');
+  progressBar.classList.add('active');
+
+  try {
+    const file = selectedFiles[0];
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    const blob = new Blob([result.value], { type: 'text/plain;charset=utf-8' });
+    const newName = file.name.replace(/\.docx$/i, '.txt');
+    saveAs(blob, newName);
+    progressFill.style.width = '100%';
+    setTimeout(() => progressBar.classList.remove('active'), 500);
+    resultArea.innerHTML = '<p class="success-msg">转换完成！文件已自动下载。</p>';
+  } catch (err) {
+    showToast('转换失败: ' + err.message);
+    progressBar.classList.remove('active');
+  }
+}
+
+function handleTextConvert() {
+  const t = currentTool;
+  const input = document.getElementById('inputText').value.trim();
+  const resultArea = document.getElementById('resultArea');
+  if (!input) { showToast('请输入内容'); return; }
+
+  resultArea.innerHTML = '';
+  resultArea.classList.add('active');
+
+  try {
+    let output = '';
+    let ext = t.toExt;
+    let mime = t.mime;
+
+    switch (t.id) {
+      case 'json-to-csv': {
+        const data = JSON.parse(input);
+        const arr = Array.isArray(data) ? data : [data];
+        if (arr.length === 0) throw new Error('空数组');
+        const headers = Object.keys(arr[0]);
+        output = headers.join(',') + '\n' + arr.map(row => headers.map(h => {
+          const v = row[h];
+          if (v === null || v === undefined) return '';
+          const s = String(v);
+          return s.includes(',') || s.includes('"') || s.includes('\n') ? '"' + s.replace(/"/g, '""') + '"' : s;
+        }).join(',')).join('\n');
+        break;
+      }
+      case 'csv-to-json': {
+        const lines = input.split('\n').filter(l => l.trim());
+        const headers = parseCSVLine(lines[0]);
+        const rows = lines.slice(1).map(l => {
+          const vals = parseCSVLine(l);
+          const obj = {};
+          headers.forEach((h, i) => obj[h] = vals[i] || '');
+          return obj;
+        });
+        output = JSON.stringify(rows, null, 2);
+        break;
+      }
+      case 'json-to-yaml': {
+        const data = JSON.parse(input);
+        output = jsyaml.dump(data);
+        break;
+      }
+      case 'yaml-to-json': {
+        const data = jsyaml.load(input);
+        output = JSON.stringify(data, null, 2);
+        break;
+      }
+      case 'md-to-html': {
+        output = `<!DOCTYPE html>\n<html>\n<head><meta charset="UTF-8"><title>Converted</title></head>\n<body>\n${marked.parse(input)}\n</body>\n</html>`;
+        break;
+      }
+      case 'html-to-md': {
+        const td = new TurndownService();
+        output = td.turndown(input);
+        break;
+      }
+    }
+
+    const blob = new Blob([output], { type: mime + ';charset=utf-8' });
+    saveAs(blob, `converted.${ext}`);
+    resultArea.innerHTML = '<p class="success-msg">转换完成！文件已自动下载。</p>';
+  } catch (err) {
+    resultArea.innerHTML = `<p style="color:var(--danger);">转换失败：${err.message}</p>`;
+  }
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') { current += '"'; i++; }
+        else inQuotes = false;
+      } else current += ch;
+    } else {
+      if (ch === '"') inQuotes = true;
+      else if (ch === ',') { result.push(current); current = ''; }
+      else current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+// ============ NAVIGATION ============
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const cat = this.dataset.cat;
+    document.getElementById('converterPanel').classList.remove('active');
+    document.getElementById('categoryGrid').style.display = '';
+    currentTool = null;
+    selectedFiles = [];
+    renderCategories(cat);
+  });
+});
+
+document.getElementById('backBtn').addEventListener('click', goBack);
+
+// ============ INIT ============
+renderCategories();
+</script>
+</body>
+</html>
